@@ -102,7 +102,6 @@ namespace AdoNet
                 string salario = this.reader["salario"].ToString();
                 this.txtOficio.Text = oficio;
                 this.txtSalario.Text = salario;
-                //this.lstEmpleados.Items.Add(apellido);
             }
             this.reader.Close();
             this.cn.Close();
