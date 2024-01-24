@@ -23,50 +23,35 @@ namespace AdoNet.Repositories
             this.com = new SqlCommand();
             this.com.Connection = this.cn;
         }
-        public List<Empleado> GetEmpleados()
+        public List<string> GetEmpleadosOficio(string oficio)
         {
-            string sql = "select * from EMP";
+            string sql = "select * from EMP where OFICIO=@oficio";
+            SqlParameter pamOficio = new SqlParameter("@oficio", oficio);
+            this.com.Parameters.Add(pamOficio);
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
             this.cn.Open();
             this.reader = this.com.ExecuteReader();
 
-            List<Empleado> empleados = new List<Empleado>();
+            List<string> apellidos = new List<string>();
             while (this.reader.Read())
             {
-                int emp_no = int.Parse(this.reader["EMP_NO"].ToString());
-                string apellido = this.reader["APELLIDO"].ToString();
-                string oficio = this.reader["OFICIO"].ToString();
-                int dir = int.Parse(this.reader["DIR"].ToString());
-                string fecha_alt = this.reader["FECHA_ALT"].ToString();
-                int salario = int.Parse(this.reader["SALARIO"].ToString());
-                int comision = int.Parse(this.reader["COMISION"].ToString());
-                int dept_no = int.Parse(this.reader["DEPT_NO"].ToString());
-
-                Empleado emp = new Empleado();
-                emp.EMP_NO = emp_no;
-                emp.APELLIDO = apellido;
-                emp.OFICIO = oficio;
-                emp.DIR = dir;
-                emp.FECHA_ALT = fecha_alt;
-                emp.SALARIO = salario;
-                emp.COMISION = comision;
-                emp.DEPT_NO = dept_no;
-                empleados.Add(emp);
+                apellidos.Add(this.reader["APELLIDO"].ToString());
             }
             this.reader.Close();
+            this.com.Parameters.Clear();
             this.cn.Close();
-            return empleados;
+            return apellidos;
         }
-        public List<String> GetOficiosEmpleados()
+        public List<string> GetOficiosEmpleados()
         {
-            string sql = "select OFICIOS from EMP";
+            string sql = "select distinct OFICIO from EMP";
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
             this.cn.Open();
             this.reader = this.com.ExecuteReader();
 
-            List<String> oficios = new List<System.String>();
+            List<string> oficios = new List<string>();
             while (this.reader.Read())
             {
                 string oficio = this.reader["OFICIO"].ToString();
@@ -77,45 +62,37 @@ namespace AdoNet.Repositories
             return oficios;
         }
 
-        public List<EmpSalario> FindEmpleadosByOficio(string oficio)
+        public DatosEmpleadosOficio DatosEmpleadosOficio(string oficio)
         {
-            string sql = "select apellido,sum(salario) as SUMATORIO from DEPT where oficio=@oficio group by apellido";
-            SqlParameter pamId = new SqlParameter("@oficio", oficio);
-            this.com.Parameters.Add(pamId);
+            string sql = "select sum(salario) as SUMASALARIAL, AVG(salario) as MEDIASALARIAL, MIN(salario) as MINIMOSALARIO, OFICIO from EMP group by OFICIO having oficio=@oficio";
+            SqlParameter pamOficio = new SqlParameter("@oficio", oficio);
+            this.com.Parameters.Add(pamOficio);
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
-
             this.cn.Open();
+
             this.reader = this.com.ExecuteReader();
             this.reader.Read();
-
-
-            List<EmpSalario> empleadosSalario = new List<EmpSalario>();
-            while (this.reader.Read())
-            {
-                int salarioTotal = int.Parse(this.reader["SUMATORIO"].ToString());
-                string apellido = this.reader["APELLIDO"].ToString();
-
-                EmpSalario empSalario = new EmpSalario();
-                empSalario.salarioTotal = salarioTotal;
-                empSalario.apellido = apellido;
-                empleadosSalario.Add(empSalario);
-            }
+            int sumaSalarial = int.Parse(this.reader["SUMASALARIAL"].ToString());
+            int mediaSalarial = int.Parse(this.reader["MEDIASALARIAL"].ToString());
+            int minimoSalario = int.Parse(this.reader["MINIMOSALARIO"].ToString());
+            DatosEmpleadosOficio datosEmp = new DatosEmpleadosOficio();
+            datosEmp.SumaSalarial = sumaSalarial;
+            datosEmp.MediaSalarial = mediaSalarial;
+            datosEmp.MinimoSalario = minimoSalario;
             this.reader.Close();
             this.com.Parameters.Clear();
             this.cn.Close();
-            return empleadosSalario;
+            return datosEmp;
         }
 
-        public int InsertarEmpleado(int id, string nombre, string localidad)
+        public int IncrementarSalarioOficio(string oficio, int incremento)
         {
-            string sql = "insert into DEPT values(@id,@nombre,@localidad)";
-            SqlParameter pamId = new SqlParameter("@id", id);
-            SqlParameter pamNombre = new SqlParameter("@nombre", nombre);
-            SqlParameter pamLocalidad = new SqlParameter("@localidad", localidad);
-            this.com.Parameters.Add(pamId);
-            this.com.Parameters.Add(pamNombre);
-            this.com.Parameters.Add(pamLocalidad);
+            string sql = "update emp set SALARIO=SALARIO+@incremento where OFICIO=@oficio";
+            SqlParameter pamOficio = new SqlParameter("@oficio", oficio);
+            SqlParameter pamIncremento = new SqlParameter("@incremento", incremento);
+            this.com.Parameters.Add(pamOficio);
+            this.com.Parameters.Add(pamIncremento);
             this.com.CommandType = CommandType.Text;
             this.com.CommandText = sql;
             this.cn.Open();
@@ -124,23 +101,7 @@ namespace AdoNet.Repositories
             this.com.Parameters.Clear();
             return results;
         }
-        public int ModificarEmpleado(int id, string nombre, string localidad)
-        {
-            string sql = "update DEPT set DNOMBRE=@nombre,LOC=@localidad where DEPT_NO=@id";
-            SqlParameter pamId = new SqlParameter("@id", id);
-            SqlParameter pamNombre = new SqlParameter("@nombre", nombre);
-            SqlParameter pamLocalidad = new SqlParameter("@localidad", localidad);
-            this.com.Parameters.Add(pamId);
-            this.com.Parameters.Add(pamNombre);
-            this.com.Parameters.Add(pamLocalidad);
-            this.com.CommandType = CommandType.Text;
-            this.com.CommandText = sql;
-            this.cn.Open();
-            int results = this.com.ExecuteNonQuery();
-            this.cn.Close();
-            this.com.Parameters.Clear();
-            return results;
-        }
+
 
     }
 }
