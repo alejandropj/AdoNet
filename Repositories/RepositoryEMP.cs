@@ -76,6 +76,7 @@ namespace AdoNet.Repositories
             int sumaSalarial = int.Parse(this.reader["SUMASALARIAL"].ToString());
             int mediaSalarial = int.Parse(this.reader["MEDIASALARIAL"].ToString());
             int minimoSalario = int.Parse(this.reader["MINIMOSALARIO"].ToString());
+
             DatosEmpleadosOficio datosEmp = new DatosEmpleadosOficio();
             datosEmp.SumaSalarial = sumaSalarial;
             datosEmp.MediaSalarial = mediaSalarial;
