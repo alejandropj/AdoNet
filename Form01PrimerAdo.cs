@@ -15,7 +15,7 @@ namespace AdoNet
             InitializeComponent();
             //texto\\texto2
             //@"texto\texto2"
-            this.connectionString = "Data Source=LOCALHOST\\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=sa;Password=MCSD2023";
+            this.connectionString = @"Data Source=ALE-PC\SQLEXPRESS;User ID=sa;Password=MCSD2023;Connect Timeout=30;Encrypt=True";
             this.cn = new SqlConnection(this.connectionString);
             //Vamos a recuperar un evento de la conexion para que nos
             //indique su cambio de estado
