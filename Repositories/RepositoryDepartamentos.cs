@@ -1,4 +1,5 @@
-﻿using AdoNet.Models;
+﻿using AdoNet.Helpers;
+using AdoNet.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,7 +18,7 @@ namespace AdoNet.Repositories
 
         public RepositoryDepartamentos()
         {
-            string connectionString = @"Data Source=LOCALHOST\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=sa;Password=MCSD2023";
+            string connectionString = HelperConfigurations.GetConnectionString();
             this.cn = new SqlConnection(connectionString);
             this.com = new SqlCommand();
             this.com.Connection = this.cn;
